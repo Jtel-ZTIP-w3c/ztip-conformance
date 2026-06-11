@@ -11,6 +11,23 @@ That is the bar for *infrastructure* (vs a product): can independent implementat
 to each other with no shared code, no original team in the loop? Here is the proof, one
 primitive at a time.
 
+## What this repo is
+
+This is an **interoperability kit, not an SDK.**
+
+The conformance contract is the **vector files in `vectors/`** — not the scripts. The
+scripts here (`ref/`) are only *one* implementation that generates and verifies those
+vectors. To prove independent interoperability, implement your **own** verifier or generator
+against the vectors (see [IMPLEMENTER.md](IMPLEMENTER.md) and [CONFORMANCE.md](CONFORMANCE.md)).
+**Do not** import this repo's verifier as a library and call that "interop" — that only shows
+our code agrees with itself. Passing `./run.sh` proves the *reference* implementation is
+internally consistent; a *second, independent* implementation matching the vectors is what
+proves interop.
+
+> **Don't take our word for it — not even our scripts.** Run the vectors against your own code.
+> That's zero-trust, applied to this repo itself: the protocol says *trust nothing up front,
+> prove each fact*; so does its conformance kit.
+
 ## Quickstart
 
 Requires Python 3.8+ and [`cryptography`](https://pypi.org/project/cryptography/)
