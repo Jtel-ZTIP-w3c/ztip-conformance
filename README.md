@@ -13,6 +13,9 @@ primitive at a time.
 
 ## Quickstart
 
+Requires Python 3.8+ and [`cryptography`](https://pypi.org/project/cryptography/)
+(`pip install cryptography`) — nothing else: no network, no build, no monorepo.
+
 ```sh
 ./run.sh
 # or:
