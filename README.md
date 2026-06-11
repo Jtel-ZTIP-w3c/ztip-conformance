@@ -30,15 +30,15 @@ proves interop.
 
 ## Quickstart
 
-Requires Python 3.8+ and [`cryptography`](https://pypi.org/project/cryptography/)
-(`pip install cryptography`) — nothing else: no network, no build, no monorepo.
-
 ```sh
-./run.sh
-# or:
-python3 ref/generate.py   # builds the test vectors (watch the JSON assemble itself)
-python3 ref/verify.py     # a SECOND, independent implementation checks them
+python3 -m venv .venv && . .venv/bin/activate
+pip install -r requirements.txt      # just: cryptography
+./run.sh                             # runs v1–v9, each green
 ```
+
+Python 3.8+; no network, no build, no monorepo. (Per level you can also run a single
+generator/verifier pair, e.g. `python3 ref/generate.py && python3 ref/verify.py` for v1.) The
+live capstone in [`live/`](live/README.md) is the one part that uses the network.
 
 Expected last line:
 
