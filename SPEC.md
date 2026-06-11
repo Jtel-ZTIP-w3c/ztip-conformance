@@ -194,6 +194,11 @@ Some VINKs aren't document facts — they're **session** facts proven *right now
 `live_presence` (a live human, not a photo) and `rightful_holder` (the live face matches the
 chip). They carry a short freshness window and are **never persisted**.
 
+This is **RVP's runtime gate** (the control lane — not the offer/composition): honoring a
+live attestation only while fresh and **rejecting stale assurance** is *untrusted-until-
+renewed* in one check — the bridge between identity (a fresh attestation) and continuous
+verification. See INTEROP.md L2 (RVP).
+
 Each session VINK carries `fresh_until` (epoch seconds); it was minted with a `ttl_seconds`
 window. The gate:
 
