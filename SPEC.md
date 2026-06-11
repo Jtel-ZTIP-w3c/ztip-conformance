@@ -277,3 +277,40 @@ creates the first truth." Mirrors `OfferFirstCeremony.run()` in `:core`.
 
 Vectors: `vectors/ceremony_v6.json` — four cases: happy-path (→ MATERIALIZE, bound),
 expired (→ REQUEST), no-consent (→ ACCEPT), validate-fail (→ VALIDATE).
+
+---
+
+## 12. Challenge-response (v7)
+
+The **network** form of the JIS root handshake (FIR/A) — no proximity, no NFC. A verifier
+issues a *fresh* challenge; the actor signs it with its Ed25519 key; the verifier checks the
+signature and the freshness. Mirrors JIS-001 `verify_identity_request` (`X-Agent-ID` /
+`X-Challenge` / `X-Signature`).
+
+Challenge + canonical signed form:
+
+```
+challenge = { agent_id, nonce, issued_at (epoch s), ttl_seconds }
+canonical = "jis-challenge:v1:" + agent_id + ":" + nonce + ":" + issued_at
+response  = base64( Ed25519_sign(actor_key, utf8(canonical)) )
+```
+
+**Accept rule:**
+
+```
+accept := Ed25519_verify(expected_key, response, utf8(canonical(challenge)))
+          AND now < challenge.issued_at + challenge.ttl_seconds
+```
+
+Two properties fall out for free:
+- **Anti-replay.** The verifier always verifies against the challenge *it* currently expects.
+  A response signed over an old/different challenge fails the signature check — no nonce
+  bookkeeping needed beyond "verify against what I issued".
+- **Freshness.** Even a correctly-signed response is refused once the challenge's TTL lapses
+  — the M2M sibling of v5's fresh-assurance gate (untrusted-until-renewed, agent↔agent).
+
+This is the lane an **AI or IoT actor** uses to prove "I'm a valid actor, now" without a
+human tap — the same `jis:` identity, a different proof transport (entity-class, v8).
+
+Vectors: `vectors/challenge_v7.json` carries a fixed `verify_at` and four cases: valid-fresh,
+bad-signature (wrong key), stale-challenge (expired), replayed (signed a different challenge).

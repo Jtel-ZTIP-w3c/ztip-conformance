@@ -1,0 +1,57 @@
+{
+  "primitive": "challenge-response",
+  "version": 7,
+  "verify_at": 1750000000,
+  "canonical": "jis-challenge:v1:<agent_id>:<nonce>:<issued_at>",
+  "rule": "accept := sig verifies over canonical(challenge) under pubkey AND verify_at < issued_at + ttl_seconds. The verifier verifies against the challenge IT expects, so a replayed/old response fails the sig check.",
+  "cases": [
+    {
+      "name": "valid-fresh",
+      "challenge": {
+        "agent_id": "root_idd",
+        "nonce": "n0nce-aaaa",
+        "issued_at": 1749999995,
+        "ttl_seconds": 30
+      },
+      "pubkey": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
+      "signature": "pS72QWfUHtKBnB7enc6CmGYG9Q+fk223+uEMzQ1DbCqjumfAar+QP3Jofxb8m+4rf4lebPYYp4DOgUI4uiitBQ==",
+      "expect_accept": true
+    },
+    {
+      "name": "bad-signature",
+      "challenge": {
+        "agent_id": "root_idd",
+        "nonce": "n0nce-aaaa",
+        "issued_at": 1749999995,
+        "ttl_seconds": 30
+      },
+      "pubkey": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
+      "signature": "LK06ueSEnLotkjC6b4zXgete+OD4i87KVSjLo3usdPatEmnidRkRf0Tk34CuR+aAzvqjrE00+rnjantZ2qWTCw==",
+      "expect_accept": false
+    },
+    {
+      "name": "stale-challenge",
+      "challenge": {
+        "agent_id": "root_idd",
+        "nonce": "n0nce-bbbb",
+        "issued_at": 1749999940,
+        "ttl_seconds": 30
+      },
+      "pubkey": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
+      "signature": "HQ08JOKZzbqDtyrWYCEBowglFV/dOCErIOlajZF3jVaXuOwZNoYDvCrfLia71POisU+FR9BwhWGzGEbkjwFKCQ==",
+      "expect_accept": false
+    },
+    {
+      "name": "replayed",
+      "challenge": {
+        "agent_id": "root_idd",
+        "nonce": "n0nce-cccc",
+        "issued_at": 1749999998,
+        "ttl_seconds": 30
+      },
+      "pubkey": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
+      "signature": "kpwUbz+yoMtSAkqk2VEVVqejT8oOb0iJp9n/yrOR5dff3+pApkjEp5ZdevgUODtVU60jpwwHl0uQRpdl7FyZBw==",
+      "expect_accept": false
+    }
+  ]
+}

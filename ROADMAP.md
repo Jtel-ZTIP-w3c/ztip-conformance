@@ -37,8 +37,8 @@ Two honest entry points: start at the **roots** (jis FIR/A) for first principles
 | **v4** | **AINS resolve + key-match** | `.aint` → pubkey resolution; verifier checks `resolved_pubkey == offer.sender_pubkey` | ✅ **live** (`resolve_v4.json`) |
 | **v5** | **Fresh-assurance** (RVP control gate) | session VINKs (`live_presence`/`rightful_holder`) honored only while fresh — reject stale = untrusted-until-renewed (maps to L2 RVP, not the offer) | ✅ **live** (`fresh_v5.json`) |
 | **v6** | **Offer-first ceremony** | the stages OFFER→…→MATERIALIZE; the T-1→T0 "never auto-bind" rule | ✅ **live** (`ceremony_v6.json`) |
-| v7 | Challenge-response (M2M) | the network form of the jis-root handshake: agent↔agent FIR/A, no proximity (JIS-001) | 🔜 **next** |
-| v8 | Entity-class profiles | same handshake, swapped proof vocabulary: human / AI / IoT — one resolver, many actors | ⬜ |
+| **v7** | **Challenge-response (M2M)** | the network form of the jis-root handshake: agent↔agent FIR/A, no proximity (JIS-001) | ✅ **live** (`challenge_v7.json`) |
+| v8 | Entity-class profiles | same handshake, swapped proof vocabulary: human / AI / IoT — one resolver, many actors | 🔜 **next** |
 
 Legend: ✅ live · 🔜 next · ⬜ genesis/planned. The **roots** (jis/tibet) are the bedrock;
 the numbered levels compose upward on them.
