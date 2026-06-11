@@ -77,3 +77,45 @@ re-running produces a **byte-identical** file. Diff it — no hidden state.
 To claim conformance: run your own implementation against `vectors/vink_v1.json`. Every
 positive case must verify true, the negative case must verify false, and your recomputed
 canonical must equal the vector's `canonical`. Green on all = you interoperate.
+
+---
+
+## 7. Offer envelope (v2)
+
+A VINK set never travels alone — it rides inside an **offer**: outer metadata only, never
+the binding identity payload. Fields (from `IdDropOffer`):
+
+```
+offer_id      : string
+expires_at    : integer, epoch seconds   — TTL is MANDATORY
+sender_pubkey : string, base64 Ed25519 public key (sec.4)
+claimed_aint  : string                   — e.g. "vandemeent.aint"
+claim_class   : string                   — e.g. "age_over_18"
+semantic_type : string                   — e.g. "identity"
+entity_class  : string (optional)        — "human" | "ai" | "iot" | "ioa"
+vinks         : array of VINK (sec.1), default []
+vinks_sig     : string|null              — base64 Ed25519 over canonical(vinks) (sec.2-4),
+                                           or null when vinks is empty
+```
+Display-only fields (`display_name`, `preview_hash`, `ssm_class`) may be present and are
+not security-relevant.
+
+**TTL:** `expired(now) := now >= expires_at`. A verifier must reject an expired offer.
+
+**Validity at v2** (composes on v1):
+
+```
+valid(offer, now) :=
+    now < offer.expires_at
+    AND ( offer.vinks is empty AND offer.vinks_sig is null         # identity-only
+          OR  Ed25519_verify(offer.sender_pubkey,
+                             offer.vinks_sig,
+                             utf8(canonical(offer.vinks))) )        # == v1
+```
+
+Binding the `sender_pubkey` to `claimed_aint` via name resolution is **v4** (out of scope
+here): v2 proves you can parse an envelope, enforce its TTL, and verify its embedded
+attestation — the unit a Terminal reads off the tap.
+
+Vectors: `vectors/offer_v2.json` carries a fixed `verify_at` (so fresh vs expired is
+deterministic) and four cases: fresh-valid, expired-ttl, tampered-sig, identity-only.

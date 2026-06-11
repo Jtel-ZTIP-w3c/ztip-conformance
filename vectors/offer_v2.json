@@ -1,0 +1,118 @@
+{
+  "primitive": "offer-envelope",
+  "version": 2,
+  "composes_on": "vink-attestation v1 (vinks_sig is an Ed25519 signature over canonical(vinks))",
+  "verify_at": 1750000000,
+  "validity_rule": "not expired (verify_at < expires_at) AND (vinks empty & sig null  OR  sig verifies over canonical(vinks))",
+  "public_key_b64": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
+  "cases": [
+    {
+      "name": "fresh-valid",
+      "offer": {
+        "offer_id": "ofr-aaaa1111",
+        "expires_at": 1750000030,
+        "sender_pubkey": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
+        "claimed_aint": "vandemeent.aint",
+        "claim_class": "age_over_18",
+        "semantic_type": "identity",
+        "entity_class": "human",
+        "vinks": [
+          {
+            "key": "age_18",
+            "granted": true,
+            "demo": false
+          },
+          {
+            "key": "valid_document",
+            "granted": true,
+            "demo": false
+          },
+          {
+            "key": "nationality_nld",
+            "granted": true,
+            "demo": false
+          }
+        ],
+        "vinks_sig": "/q9H0rlFWVH5wdXU8po3R9nunHGoqatl2tqacZplu3esFkwbQRUiO5Hc+pVwTW6nyVcNusr40c8lLPrJnZKHAQ=="
+      },
+      "expect_valid": true
+    },
+    {
+      "name": "expired-ttl",
+      "offer": {
+        "offer_id": "ofr-bbbb2222",
+        "expires_at": 1749999990,
+        "sender_pubkey": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
+        "claimed_aint": "vandemeent.aint",
+        "claim_class": "age_over_18",
+        "semantic_type": "identity",
+        "entity_class": "human",
+        "vinks": [
+          {
+            "key": "age_18",
+            "granted": true,
+            "demo": false
+          },
+          {
+            "key": "valid_document",
+            "granted": true,
+            "demo": false
+          },
+          {
+            "key": "nationality_nld",
+            "granted": true,
+            "demo": false
+          }
+        ],
+        "vinks_sig": "/q9H0rlFWVH5wdXU8po3R9nunHGoqatl2tqacZplu3esFkwbQRUiO5Hc+pVwTW6nyVcNusr40c8lLPrJnZKHAQ=="
+      },
+      "expect_valid": false
+    },
+    {
+      "name": "tampered-sig",
+      "offer": {
+        "offer_id": "ofr-cccc3333",
+        "expires_at": 1750000030,
+        "sender_pubkey": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
+        "claimed_aint": "vandemeent.aint",
+        "claim_class": "age_over_18",
+        "semantic_type": "identity",
+        "entity_class": "human",
+        "vinks": [
+          {
+            "key": "age_18",
+            "granted": true,
+            "demo": false
+          },
+          {
+            "key": "valid_document",
+            "granted": true,
+            "demo": false
+          },
+          {
+            "key": "nationality_nld",
+            "granted": true,
+            "demo": false
+          }
+        ],
+        "vinks_sig": "O+dCOS2dCZFZLiO4NM/yq18UDeDy5ABCW1UOlHhMUt9760/Am30IsnWHErWVfk0MhMmcE3JQFcNvjfWwhLSaCw=="
+      },
+      "expect_valid": false
+    },
+    {
+      "name": "identity-only",
+      "offer": {
+        "offer_id": "ofr-dddd4444",
+        "expires_at": 1750000030,
+        "sender_pubkey": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
+        "claimed_aint": "vandemeent.aint",
+        "claim_class": "age_over_18",
+        "semantic_type": "identity",
+        "entity_class": "human",
+        "vinks": [],
+        "vinks_sig": null
+      },
+      "expect_valid": true
+    }
+  ]
+}

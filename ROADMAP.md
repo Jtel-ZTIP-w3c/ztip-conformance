@@ -32,8 +32,8 @@ Two honest entry points: start at the **roots** (jis FIR/A) for first principles
 | **root** | **jis · identity / FIR-A** | Ed25519 keypair + `jis:` scheme + fresh challenge→signed response: "I'm a valid actor, *now*" — where two systems first handshake | ⬜ genesis |
 | **root** | **tibet · intent token** | signed intent/event token + chain — "what happened, in order, provable" (provenance) | ⬜ genesis |
 | **v1** | **VINK attestation** | jis-signing applied to a yes/no claim set: canonical string + Ed25519 sign/verify | ✅ **live** (`vink_v1.json`) |
-| v2 | Offer envelope | the `IdDropOffer` JSON wire-format: fields, types, TTL, how `vinks`/`vinks_sig` embed | 🔜 **next** |
-| v3 | NFC transport | HCE AID + SELECT APDU + payload framing — two independent stacks can physically tap | ⬜ |
+| **v2** | **Offer envelope** | the `IdDropOffer` JSON wire-format: fields, types, TTL, how `vinks`/`vinks_sig` embed | ✅ **live** (`offer_v2.json`) |
+| v3 | NFC transport | HCE AID + SELECT APDU + payload framing — two independent stacks can physically tap | 🔜 **next** |
 | v4 | AINS resolve + key-match | `.aint` → pubkey resolution; verifier checks `resolved_pubkey == offer.sender_pubkey` | ⬜ |
 | v5 | Fresh-assurance lane | session VINKs (`live_presence`/`rightful_holder`) with TTL; fresh-at-use, never persisted | ⬜ |
 | v6 | Offer-first ceremony | the stages OFFER→…→MATERIALIZE; the T-1→T0 "never auto-bind" rule | ⬜ |
@@ -43,22 +43,26 @@ Two honest entry points: start at the **roots** (jis FIR/A) for first principles
 Legend: ✅ live · 🔜 next · ⬜ genesis/planned. The **roots** (jis/tibet) are the bedrock;
 the numbered levels compose upward on them.
 
-## What "next" looks like (v2 — Offer envelope)
+## v2 — Offer envelope (✅ live)
 
-The natural follow-on to v1. The signed VINK set never travels alone; it rides inside an
-**offer**. v2 pins that envelope so a second implementation can parse and validate a whole
-offer, not just a VINK set:
+Done. `ref/generate_offer.py` + `ref/verify_offer.py` + `vectors/offer_v2.json` (fresh-valid,
+expired-ttl, tampered-sig, identity-only) — all green. It composes directly on v1 (the
+signature check *is* v1) and is the unit a Terminal reads off the tap. See `SPEC.md` sec.7.
 
-- **Spec:** the `IdDropOffer` fields (`offer_id`, `expires_at`, `sender_pubkey`,
-  `claimed_aint`, `claim_class`, `semantic_type`, `entity_class`, `vinks`, `vinks_sig`, …),
-  their types, and the **TTL rule** (`expired(now) := now >= expires_at`).
-- **Vectors:** a few full offer JSONs — one fresh, one expired, one with a tampered
-  `vinks_sig` — each with `expect_valid`.
-- **Verifier:** parse offer → check not-expired → verify `vinks_sig` over
-  `canonical(vinks)` (reusing v1) → report valid/invalid.
+## What "next" looks like (v3 — NFC transport)
 
-It composes directly on v1 (the signature check *is* v1), so it's a small, satisfying next
-step — and it's the unit a Terminal actually reads off the tap.
+The envelope (v2) now has to actually cross the air. v3 pins how two independent stacks
+physically exchange it over NFC, so a third party's reader can read your offerer's tap:
+
+- **Spec:** the HCE AID (`F0 49 44 44 52 4F 50` = "IDDROP"), the SELECT-by-DF-name APDU
+  (`00 A4 04 00 <Lc> <AID>`), the response framing (offer JSON bytes + `90 00`), and the
+  unknown-AID status (`6A 82`).
+- **Vectors:** APDU byte-strings (hex) → expected response shape (is-select? payload? SW).
+- **Verifier:** given a SELECT APDU + an offer, assemble/parse the response exactly as the
+  reference `NfcOfferService` does — byte-for-byte.
+
+This is the first level whose "transport" is bytes-on-the-wire rather than a JSON field, so
+the vectors become hex APDUs. Still runnable, still no vendor.
 
 ## Why this order
 

@@ -1,6 +1,10 @@
 #!/usr/bin/env sh
 set -e
 cd "$(dirname "$0")"
+echo "### v1 — VINK attestation"
 python3 ref/generate.py
-echo
 python3 ref/verify.py
+echo
+echo "### v2 — offer envelope"
+python3 ref/generate_offer.py
+python3 ref/verify_offer.py
