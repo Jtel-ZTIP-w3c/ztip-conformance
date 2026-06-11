@@ -1,0 +1,46 @@
+{
+  "primitive": "fresh-assurance",
+  "version": 5,
+  "verify_at": 1750000000,
+  "ttl_default_seconds": 120,
+  "rule": "honored := verify_at < fresh_until. Session VINKs are never persisted; a stored/replayed one is stale by construction.",
+  "note": "Independent of the offer TTL (v2): even inside a still-valid offer, a session VINK only counts while fresh. Stale session VINKs drop; the document VINKs (18+/valid/NL) are unaffected.",
+  "cases": [
+    {
+      "name": "fresh-live",
+      "vink": {
+        "key": "live_presence",
+        "ttl_seconds": 120,
+        "fresh_until": 1750000060
+      },
+      "expect_honored": true
+    },
+    {
+      "name": "expired-live",
+      "vink": {
+        "key": "live_presence",
+        "ttl_seconds": 120,
+        "fresh_until": 1749999995
+      },
+      "expect_honored": false
+    },
+    {
+      "name": "fresh-rightful",
+      "vink": {
+        "key": "rightful_holder",
+        "ttl_seconds": 120,
+        "fresh_until": 1750000030
+      },
+      "expect_honored": true
+    },
+    {
+      "name": "replayed-rightful",
+      "vink": {
+        "key": "rightful_holder",
+        "ttl_seconds": 120,
+        "fresh_until": 1749996400
+      },
+      "expect_honored": false
+    }
+  ]
+}

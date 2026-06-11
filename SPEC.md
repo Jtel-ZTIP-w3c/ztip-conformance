@@ -185,3 +185,31 @@ candidate.
 Vectors: `vectors/resolve_v4.json` ships an offline `resolve_fixture` (no live call) and four
 cases: key-match-active (binds), key-mismatch (different key), revoked (tombstone),
 unresolvable (absent).
+
+---
+
+## 10. Fresh-assurance (v5)
+
+Some VINKs aren't document facts — they're **session** facts proven *right now*:
+`live_presence` (a live human, not a photo) and `rightful_holder` (the live face matches the
+chip). They carry a short freshness window and are **never persisted**.
+
+Each session VINK carries `fresh_until` (epoch seconds); it was minted with a `ttl_seconds`
+window. The gate:
+
+```
+honored(session_vink, now) := now < session_vink.fresh_until
+```
+
+This is **independent of** the offer TTL (§7): even inside a still-valid offer, a session
+VINK only counts while fresh. When it lapses it drops — the offer's document VINKs
+(18+/valid/NL) are unaffected; only the live claim must be re-proven.
+
+> **Why never persisted.** The freshness gate *is* the anti-supercookie enforcement: a
+> stored or replayed session VINK arrives after its `fresh_until` and is, by construction,
+> stale → rejected. "Fresh biometric at the moment of use, not a saved token." A verifier
+> MUST NOT accept a session VINK whose freshness has lapsed, and MUST NOT cache one to
+> shortcut a later check.
+
+Vectors: `vectors/fresh_v5.json` carries a fixed `verify_at` and four cases: fresh-live,
+expired-live, fresh-rightful, replayed-rightful (presented an hour late → rejected).
