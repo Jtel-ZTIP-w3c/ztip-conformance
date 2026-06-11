@@ -63,6 +63,19 @@ Ed25519 is deterministic — so re-running `generate.py` yields a **byte-identic
 `vectors/vink_v1.json`. Diff it; there is no hidden state. (Same spirit as
 `tibet-triage upip-reproduce`.)
 
+## Running in production (the live witness)
+
+The vectors are the offline *contract*. [`live/verify_live.py`](live/README.md) is the
+*witness*: it resolves a registered `.aint` over the **real** public AINS and binds to the
+live key — same logic, production infrastructure, normalizing the real on-wire encoding.
+
+```sh
+python3 live/verify_live.py     # → BOUND root_idd (live), unbound for an absent name
+```
+
+Needs network; non-deterministic by design. Not a conformance vector — the proof that the
+contract runs in the wild.
+
 ## Don't boil the ocean — one level at a time
 
 We deliberately ship **one primitive at a time**, each runnable and verifiable before the

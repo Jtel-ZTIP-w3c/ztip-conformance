@@ -44,6 +44,13 @@ Two honest entry points: start at the **roots** (jis FIR/A) for first principles
 Legend: ✅ live · 🔜 next · ⬜ genesis/planned. The **roots** (jis/tibet) are the bedrock;
 the numbered levels compose upward on them.
 
+**Beyond the ladder — the live capstone.** The nine levels above are offline & deterministic
+(the contract). [`live/verify_live.py`](live/README.md) is the *witness*: it resolves a
+registered `.aint` over the **real** public AINS and binds to the live key — the same v4
+logic, on production infrastructure, normalizing the real hex encoding. Running in production,
+not a fixture. (A fresh-signature handshake runs where the `.aint`'s signer lives; v7 proves
+the logic offline.)
+
 ## v2 — Offer envelope (✅ live)
 
 Done. `ref/generate_offer.py` + `ref/verify_offer.py` + `vectors/offer_v2.json` (fresh-valid,
