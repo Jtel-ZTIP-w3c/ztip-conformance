@@ -314,3 +314,35 @@ human tap — the same `jis:` identity, a different proof transport (entity-clas
 
 Vectors: `vectors/challenge_v7.json` carries a fixed `verify_at` and four cases: valid-fresh,
 bad-signature (wrong key), stale-challenge (expired), replayed (signed a different challenge).
+
+---
+
+## 13. Entity-class (v8)
+
+**One resolver, many actors.** The handshake is identical for a human, an AI, or an IoT
+device — resolve the `.aint` to a JIS key, verify a signature under it. What *swaps* is the
+proof vocabulary the actor is allowed to present:
+
+```
+human → biometric_presence     (fresh biometric / proximity + state credential)
+ai    → mandate_chain          (mandate + causal step; stateless between calls)
+iot   → substrate_continuity   (unbroken substrate / behaviour pattern)
+```
+
+Canonical signed form and accept rule:
+
+```
+canonical = "jis-proof:v1:" + entity_class + ":" + proof_type + ":" + nonce
+accept := proof_type == lane(entity_class)
+          AND Ed25519_verify(actor_key, proof, utf8(canonical))
+```
+
+The crypto and the resolve don't change between classes — only the lane. A **human presenting
+an AI's mandate proof** is refused: not because the signature is bad, but because the
+vocabulary doesn't match the class. This is the generalization the whole stack is built for:
+the same `jis:` identity and the same verification carry a person, an agent, and a device —
+each proving it's trustworthy *in its own terms*.
+
+Vectors: `vectors/entity_v8.json` — five cases: human-biometric, ai-mandate, iot-continuity
+(all accept), wrong-lane (human with an AI proof → refused), bad-signature (right lane, wrong
+key → refused).

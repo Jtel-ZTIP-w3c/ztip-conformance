@@ -1,0 +1,68 @@
+{
+  "primitive": "entity-class",
+  "version": 8,
+  "lanes": {
+    "human": "biometric_presence",
+    "ai": "mandate_chain",
+    "iot": "substrate_continuity"
+  },
+  "canonical": "jis-proof:v1:<entity_class>:<proof_type>:<nonce>",
+  "rule": "accept := proof_type == lanes[entity_class] AND Ed25519_verify(key, proof, canonical). Same handshake for every class; only the proof vocabulary differs.",
+  "cases": [
+    {
+      "name": "human-biometric",
+      "actor": {
+        "entity_class": "human",
+        "proof_type": "biometric_presence",
+        "nonce": "h1",
+        "key": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
+        "proof": "DIk87dUwq4mOLyvvlOzhwcGLMXTHWHzT/hkwsYn7aXVVK+81epAQlye88BZlCtpXRbAG6V0JJzHc2gdLDTRJDw=="
+      },
+      "expect_accept": true
+    },
+    {
+      "name": "ai-mandate",
+      "actor": {
+        "entity_class": "ai",
+        "proof_type": "mandate_chain",
+        "nonce": "a1",
+        "key": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
+        "proof": "MHSXhNSBrFkuJ/h/Q0PnPsJq/SEREsSyaG0UVyK1snaitJ4v5UJ/1cFf1E8iIKzjx+FlcIbIoip8FpWrZjA/Dg=="
+      },
+      "expect_accept": true
+    },
+    {
+      "name": "iot-continuity",
+      "actor": {
+        "entity_class": "iot",
+        "proof_type": "substrate_continuity",
+        "nonce": "i1",
+        "key": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
+        "proof": "AaJNVj32EJW7uvE3oUXvq/ataMjCG2wg40EGrsQ9PtPf+N+cuUqLI91up/fpo4dpu51+kW1YYLpwpRecXLfTCA=="
+      },
+      "expect_accept": true
+    },
+    {
+      "name": "wrong-lane",
+      "actor": {
+        "entity_class": "human",
+        "proof_type": "mandate_chain",
+        "nonce": "w1",
+        "key": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
+        "proof": "hlq5JqzNQYZ7ACoydIp3zxwuhZTjvbcwzKTYsb533npImKOmHDFaMeUBG8VmXGIOOCbJ4co9eEmxX9a7QeTkAw=="
+      },
+      "expect_accept": false
+    },
+    {
+      "name": "bad-signature",
+      "actor": {
+        "entity_class": "ai",
+        "proof_type": "mandate_chain",
+        "nonce": "b1",
+        "key": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
+        "proof": "8gSxRSqzpN9QD8ov6L3vA7upBPfU7r1RdMnR6tC9r+8NCv0cgbNWZ3hQUSOyJ4BRotvMVpi9vIGQO2pbB/Z7AQ=="
+      },
+      "expect_accept": false
+    }
+  ]
+}
