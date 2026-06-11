@@ -1,0 +1,63 @@
+{
+  "primitive": "offer-first-ceremony",
+  "version": 6,
+  "stages": [
+    "OFFER",
+    "REQUEST",
+    "ACCEPT",
+    "SEAL",
+    "VALIDATE",
+    "MATERIALIZE"
+  ],
+  "invariant": "bound is false at every stage and true ONLY at MATERIALIZE; bound := (not expired) AND accept AND validate. No auto-bind.",
+  "cases": [
+    {
+      "name": "happy-path",
+      "input": {
+        "expired": false,
+        "accept": true,
+        "validate": true
+      },
+      "expect": {
+        "final_stage": "MATERIALIZE",
+        "bound": true
+      }
+    },
+    {
+      "name": "expired",
+      "input": {
+        "expired": true,
+        "accept": true,
+        "validate": true
+      },
+      "expect": {
+        "final_stage": "REQUEST",
+        "bound": false
+      }
+    },
+    {
+      "name": "no-consent",
+      "input": {
+        "expired": false,
+        "accept": false,
+        "validate": true
+      },
+      "expect": {
+        "final_stage": "ACCEPT",
+        "bound": false
+      }
+    },
+    {
+      "name": "validate-fail",
+      "input": {
+        "expired": false,
+        "accept": true,
+        "validate": false
+      },
+      "expect": {
+        "final_stage": "VALIDATE",
+        "bound": false
+      }
+    }
+  ]
+}

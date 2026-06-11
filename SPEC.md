@@ -218,3 +218,34 @@ VINK only counts while fresh. When it lapses it drops — the offer's document V
 
 Vectors: `vectors/fresh_v5.json` carries a fixed `verify_at` and four cases: fresh-live,
 expired-live, fresh-rightful, replayed-rightful (presented an hour late → rejected).
+
+---
+
+## 11. Offer-first ceremony (v6)
+
+An identity offer is **never auto-binding**. It enters as a T-1 *candidate* and becomes a
+bound T0 truth only after passing every gate, in order:
+
+```
+OFFER → REQUEST → ACCEPT → SEAL → VALIDATE → MATERIALIZE
+```
+
+- **TTL** (REQUEST): an expired offer is refused before anything else.
+- **Consent** (ACCEPT): explicit local accept — there is no auto-accept (Heart-in-the-Loop).
+- **Validation** (VALIDATE): AINS/JIS/TIBET trust outcome (byte+semantic+claim+causal).
+- **MATERIALIZE**: the candidate becomes bound — and this is the *only* stage where `bound`
+  is true.
+
+**Invariant:**
+
+```
+bound := (not expired) AND accept AND validate
+the ceremony stops at the first failing gate; bound is false at every stage but MATERIALIZE
+```
+
+So a stranger's offer can be presented, requested, even sealed — and still bind **nothing**
+until a human accepts and the trust checks pass. "Pinning starts after truth exists; genesis
+creates the first truth." Mirrors `OfferFirstCeremony.run()` in `:core`.
+
+Vectors: `vectors/ceremony_v6.json` — four cases: happy-path (→ MATERIALIZE, bound),
+expired (→ REQUEST), no-consent (→ ACCEPT), validate-fail (→ VALIDATE).
