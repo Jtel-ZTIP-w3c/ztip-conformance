@@ -1,0 +1,127 @@
+{
+  "primitive": "vink-attestation",
+  "version": 1,
+  "algorithm": "Ed25519",
+  "message": "UTF-8 bytes of the canonical string (SPEC.md sec.2)",
+  "encoding": "base64 standard, padded, no line-wrap (== Android Base64.NO_WRAP)",
+  "seed_phrase": "ztip-conformance/vink-attestation/v1",
+  "seed_hex": "75c66e4c31cda24dc1d87d39b058fe92f330e6ba59e22a07a6b8c3dfc04b1b54",
+  "public_key_b64": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
+  "cases": [
+    {
+      "name": "adult-nl-genuine",
+      "vinks": [
+        {
+          "key": "age_18",
+          "granted": true,
+          "demo": false
+        },
+        {
+          "key": "valid_document",
+          "granted": true,
+          "demo": false
+        },
+        {
+          "key": "nationality_nld",
+          "granted": true,
+          "demo": false
+        },
+        {
+          "key": "genuine_document",
+          "granted": true,
+          "demo": false
+        }
+      ],
+      "canonical": "age_18=1|genuine_document=1|nationality_nld=1|valid_document=1",
+      "signature_b64": "sPHlgnFIAkmWKXLRliwLPbdFIdl0JubsGvMLtv+ZD6IJAmWh8Fb1VwmcUGPMdCyNSJHtJip+xtE0nY+AQWPsBA==",
+      "expect_verify": true
+    },
+    {
+      "name": "live-session",
+      "vinks": [
+        {
+          "key": "age_18",
+          "granted": true,
+          "demo": false
+        },
+        {
+          "key": "live_presence",
+          "granted": true,
+          "demo": false
+        },
+        {
+          "key": "rightful_holder",
+          "granted": true,
+          "demo": false
+        }
+      ],
+      "canonical": "age_18=1|live_presence=1|rightful_holder=1",
+      "signature_b64": "xSrZvOFyC6S1/QrljG8EfXv42jf1XRwMyqHst9l4B3Hvk/RCUTKGQfIdJ/HhhjNmchpf7f5BtIKB4mQbyyl+CQ==",
+      "expect_verify": true
+    },
+    {
+      "name": "demo-flagged",
+      "vinks": [
+        {
+          "key": "age_18",
+          "granted": true,
+          "demo": true
+        },
+        {
+          "key": "nationality_nld",
+          "granted": true,
+          "demo": true
+        }
+      ],
+      "canonical": "age_18=1d|nationality_nld=1d",
+      "signature_b64": "Y0ZqTSY4BrKzVDqhUz46yltecWTDONadQmQGPEZvuU4WRy15RZe2rTJ17oc5JFUWK2r2yP2FvugzbJYcJWtVCQ==",
+      "expect_verify": true
+    },
+    {
+      "name": "minor-denied",
+      "vinks": [
+        {
+          "key": "age_18",
+          "granted": false,
+          "demo": false
+        },
+        {
+          "key": "valid_document",
+          "granted": true,
+          "demo": false
+        }
+      ],
+      "canonical": "age_18=0|valid_document=1",
+      "signature_b64": "s3q2l+1ECz8XuGpD9m//U2fqNN1Qh3oufkMsmLoev/R6Ovl9HYhNs3OQXkx287clOIDENiQV0kQt+BJ1DsWhBw==",
+      "expect_verify": true
+    },
+    {
+      "name": "tampered-age (negative)",
+      "vinks": [
+        {
+          "key": "age_18",
+          "granted": false,
+          "demo": false
+        },
+        {
+          "key": "valid_document",
+          "granted": true,
+          "demo": false
+        },
+        {
+          "key": "nationality_nld",
+          "granted": true,
+          "demo": false
+        },
+        {
+          "key": "genuine_document",
+          "granted": true,
+          "demo": false
+        }
+      ],
+      "canonical": "age_18=0|genuine_document=1|nationality_nld=1|valid_document=1",
+      "signature_b64": "sPHlgnFIAkmWKXLRliwLPbdFIdl0JubsGvMLtv+ZD6IJAmWh8Fb1VwmcUGPMdCyNSJHtJip+xtE0nY+AQWPsBA==",
+      "expect_verify": false
+    }
+  ]
+}
