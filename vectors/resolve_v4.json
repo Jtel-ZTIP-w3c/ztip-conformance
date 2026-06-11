@@ -1,30 +1,119 @@
 {
   "primitive": "ains-resolve-keymatch",
   "version": 4,
-  "binding_rule": "bound := resolve(claimed_aint) exists AND status=='active' AND record.public_key == offer.sender_pubkey",
-  "encoding_note": "record.public_key and offer.sender_pubkey MUST share one encoding (base64, SPEC sec.4); hex vs base64 is the #1 key-match breaker.",
+  "model": "identity=jis:ed25519:key · namespace=.aint · surface=SSM. AINS names are namespace entries, not identities; all trust binds to the resolved JIS key.",
+  "suffix_rule": "bound-name suffix = base32(sha256(pubkey_raw || '|aint|1'))[:6] lowercase — a namespace disambiguator, recompute from the resolved key and require a match.",
+  "binding_rule": "bound := resolves AND status=='active' AND proof verifies over name|canonical_actor|status|surface|sorted(caps) AND (name_class!='bound' OR suffix matches key) AND canonical_actor=='jis:ed25519:'+public_key AND public_key == offer.sender_pubkey",
+  "encoding_note": "public_key / sender_pubkey share one encoding (base64, SPEC sec.4). Bind by KEY, never by label.",
   "resolve_fixture": {
-    "vandemeent.aint": {
+    "vandemeent-qiwmmj.aint": {
+      "name": "vandemeent-qiwmmj.aint",
+      "name_class": "bound",
+      "canonical_actor": "jis:ed25519:209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
       "public_key": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
       "status": "active",
-      "entity_type": "idd"
+      "surface": "now.identity.resolve.normal",
+      "capabilities": [
+        "offer.issue",
+        "vink.sign"
+      ],
+      "proof": "PWqAQ/umN+O4dTtF02/Ssu0oaoFjOBY+llOjcxfW3zsXxGFfx2j0Hjy6Xi37qOwko4FWSejNar21NaEpnA3yBg=="
     },
-    "imposter.aint": {
+    "vandemeent-zzzzzz.aint": {
+      "name": "vandemeent-zzzzzz.aint",
+      "name_class": "bound",
+      "canonical_actor": "jis:ed25519:209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
+      "public_key": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
+      "status": "active",
+      "surface": "now.identity.resolve.normal",
+      "capabilities": [
+        "offer.issue",
+        "vink.sign"
+      ],
+      "proof": "8fgJOFO4AxPfrvpMAKzTwV3y6i7Oi/UNiCRKk7WfYhyfhq8uUEO1K2KI9BB+P51cWOHDS9vsyJKk9gkmjfzdBw=="
+    },
+    "badproof-qiwmmj.aint": {
+      "name": "badproof-qiwmmj.aint",
+      "name_class": "bound",
+      "canonical_actor": "jis:ed25519:209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
+      "public_key": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
+      "status": "active",
+      "surface": "now.identity.resolve.normal",
+      "capabilities": [
+        "offer.issue",
+        "vink.sign"
+      ],
+      "proof": "tpr/++aeTNAlgkxOhT9rCWegfy8LwXqt/AcTtM9Ps0qw/fFj1wuUScCMk3WXWOHm3pemMHVUFamDN9e/ku20Cw=="
+    },
+    "jasper.aint": {
+      "name": "jasper.aint",
+      "name_class": "alias",
+      "canonical_actor": "jis:ed25519:209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
+      "public_key": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
+      "status": "active",
+      "surface": "now.identity.resolve.normal",
+      "capabilities": [
+        "offer.issue",
+        "vink.sign"
+      ],
+      "proof": "W0zYJWgy6XSUztRX2/i4x59j5jeqSPAcMIOq8Wkmxn4WPeCvJPsWyzCM7bT8MoMPj971hlmpgCMQhYW9vcPQAA=="
+    },
+    "imposter-2ped43.aint": {
+      "name": "imposter-2ped43.aint",
+      "name_class": "bound",
+      "canonical_actor": "jis:ed25519:GscbMlEaoPodPGK2HybIxipWX8n/2apoW1NkfQfORTI=",
       "public_key": "GscbMlEaoPodPGK2HybIxipWX8n/2apoW1NkfQfORTI=",
       "status": "active",
-      "entity_type": "idd"
+      "surface": "now.identity.resolve.normal",
+      "capabilities": [
+        "offer.issue",
+        "vink.sign"
+      ],
+      "proof": "BZxOBU3dCqAeIyw6nccPoQ2rRC4JTgTG46XpuB+YzWfRTF9zHhaVik+TpSp67zNUMllrdTRiLaPY/8MIJ0knDA=="
     },
-    "retired.aint": {
+    "retired-qiwmmj.aint": {
+      "name": "retired-qiwmmj.aint",
+      "name_class": "bound",
+      "canonical_actor": "jis:ed25519:209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
       "public_key": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
       "status": "revoked",
-      "entity_type": "idd"
+      "surface": "now.identity.resolve.normal",
+      "capabilities": [
+        "offer.issue",
+        "vink.sign"
+      ],
+      "proof": "0YUfdLE3rF0zLzAoEZQpspW1XzvX1QU9A/P/rr1PGx0jBb4UFMPONY6K+mJ6WvMfmItcIIiytt1kr4fLr8ldBg=="
     }
   },
   "cases": [
     {
-      "name": "key-match-active",
+      "name": "bound-match",
       "offer": {
-        "claimed_aint": "vandemeent.aint",
+        "claimed_aint": "vandemeent-qiwmmj.aint",
+        "sender_pubkey": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4="
+      },
+      "expect_bound": true
+    },
+    {
+      "name": "forged-suffix",
+      "offer": {
+        "claimed_aint": "vandemeent-zzzzzz.aint",
+        "sender_pubkey": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4="
+      },
+      "expect_bound": false
+    },
+    {
+      "name": "bad-proof",
+      "offer": {
+        "claimed_aint": "badproof-qiwmmj.aint",
+        "sender_pubkey": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4="
+      },
+      "expect_bound": false
+    },
+    {
+      "name": "alias-match",
+      "offer": {
+        "claimed_aint": "jasper.aint",
         "sender_pubkey": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4="
       },
       "expect_bound": true
@@ -32,7 +121,7 @@
     {
       "name": "key-mismatch",
       "offer": {
-        "claimed_aint": "imposter.aint",
+        "claimed_aint": "imposter-2ped43.aint",
         "sender_pubkey": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4="
       },
       "expect_bound": false
@@ -40,7 +129,7 @@
     {
       "name": "revoked",
       "offer": {
-        "claimed_aint": "retired.aint",
+        "claimed_aint": "retired-qiwmmj.aint",
         "sender_pubkey": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4="
       },
       "expect_bound": false

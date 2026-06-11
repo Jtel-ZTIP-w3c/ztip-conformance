@@ -1,17 +1,25 @@
 #!/usr/bin/env python3
 """ZTIP conformance — AINS RESOLVE + KEY-MATCH test-vector generator (primitive v4).
 
-An offer claims a `.aint`. v4 is the name→key binding: resolve the `.aint` over AINS to a
-public key + status, and check `resolved.public_key == offer.sender_pubkey`. Only then may
-the offer bind to that identity. A signature alone proves a key; the resolve proves the key
-belongs to the claimed name.
+The clean split (Codex/Jasper):
+    identity  = key   -> jis:ed25519:<fingerprint>   (canonical; all trust binds here)
+    namespace = .aint -> AINS resolves names to keys/capabilities/endpoints (NOT identity)
+    surface   = SSM   -> what lane/type the record claims to be (without trusting name/payload)
 
-Deterministic + OFFLINE: the resolve responses are a FIXED fixture (recorded), not a live
-call. Keys are derived from fixed seeds (Ed25519, deterministic), reusing the v1 key.
+So an AINS name is a semantic-namespace entry, not an identity. A resolver may use
+hash-qualified `.aint` names for collision resistance, but every trust decision MUST bind to
+the resolved JIS actor key.
 
-CRITICAL interop point: the resolve record's `public_key` MUST be in the SAME encoding as the
-offer's `sender_pubkey` (base64, SPEC sec.4). Mixing hex and base64 is the #1 key-match
-breaker — the match is a direct string compare.
+Two name classes:
+  - **alias**  (jasper.aint)               — human, mutable.
+  - **bound**  (vandemeent-<suffix>.aint)  — namespace disambiguator, key-derived:
+        suffix = base32( sha256(pubkey_raw || "|aint|1") )[:6]  (lowercase, no padding)
+    It is NOT the identity — it's a stable, recomputable hint. A name that lies about the key
+    is caught as a suffix mismatch.
+
+Each record carries `surface` (SSM lane) + `capabilities`, and a `proof`: the actor's Ed25519
+signature over `name|canonical_actor|status|surface|caps` so a resolver can't fabricate it.
+Deterministic + OFFLINE (fixed seeds, no live call).
 """
 import base64
 import hashlib
@@ -24,51 +32,96 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "..", "vectors", "resolve_v4.json")
 
+NAMESPACE = b"aint"
+PROFILE_VERSION = b"1"
+SURFACE = "now.identity.resolve.normal"
+CAPS = ["offer.issue", "vink.sign"]
 
-def pub_b64(seed_phrase):
-    seed = hashlib.sha256(seed_phrase).digest()
-    sk = Ed25519PrivateKey.from_private_bytes(seed)
+
+def keypair(seed_phrase):
+    sk = Ed25519PrivateKey.from_private_bytes(hashlib.sha256(seed_phrase).digest())
     raw = sk.public_key().public_bytes(serialization.Encoding.Raw, serialization.PublicFormat.Raw)
-    return base64.b64encode(raw).decode("ascii")
+    return sk, base64.b64encode(raw).decode("ascii")
+
+
+def bound_suffix(pub_b64):
+    raw = base64.b64decode(pub_b64)
+    h = hashlib.sha256(raw + b"|" + NAMESPACE + b"|" + PROFILE_VERSION).digest()
+    return base64.b32encode(h).decode("ascii").lower().replace("=", "")[:6]
+
+
+def canonical_actor(pub_b64):
+    return "jis:ed25519:" + pub_b64
+
+
+def proof_msg(name, actor, status, surface, caps):
+    return f"{name}|{actor}|{status}|{surface}|{','.join(sorted(caps))}".encode("utf-8")
+
+
+def proof(sk, name, actor, status, surface, caps):
+    return base64.b64encode(sk.sign(proof_msg(name, actor, status, surface, caps))).decode("ascii")
+
+
+def record(name, name_class, pub, sk, status, proof_override=None):
+    actor = canonical_actor(pub)
+    return {
+        "name": name,
+        "name_class": name_class,
+        "canonical_actor": actor,
+        "public_key": pub,
+        "status": status,
+        "surface": SURFACE,
+        "capabilities": CAPS,
+        "proof": proof_override if proof_override is not None else proof(sk, name, actor, status, SURFACE, CAPS),
+    }
 
 
 def main():
-    OUR = pub_b64(b"ztip-conformance/vink-attestation/v1")  # the v1 / v2 identity key
-    IMP = pub_b64(b"ztip-conformance/imposter-key")         # a different, valid Ed25519 key
+    our_sk, OUR = keypair(b"ztip-conformance/vink-attestation/v1")
+    imp_sk, IMP = keypair(b"ztip-conformance/imposter-key")
+    our_suf, imp_suf = bound_suffix(OUR), bound_suffix(IMP)
 
-    # Recorded AINS resolve responses (the offline fixture). Shape mirrors
-    # GET /api/ains/resolve/<name> -> { record: { public_key, status, entity_type } }.
+    n_bound = f"vandemeent-{our_suf}.aint"
+    n_forged = "vandemeent-zzzzzz.aint"
+    n_badproof = f"badproof-{our_suf}.aint"
+    n_alias = "jasper.aint"
+    n_imp = f"imposter-{imp_suf}.aint"
+    n_revoked = f"retired-{our_suf}.aint"
+
     fixture = {
-        "vandemeent.aint": {"public_key": OUR, "status": "active", "entity_type": "idd"},
-        "imposter.aint":   {"public_key": IMP, "status": "active", "entity_type": "idd"},
-        "retired.aint":    {"public_key": OUR, "status": "revoked", "entity_type": "idd"},
-        # "ghost.aint" is intentionally ABSENT -> unresolvable
+        n_bound:    record(n_bound, "bound", OUR, our_sk, "active"),
+        n_forged:   record(n_forged, "bound", OUR, our_sk, "active"),     # valid proof, suffix lies
+        n_badproof: record(n_badproof, "bound", OUR, our_sk, "active",
+                           proof_override=proof(our_sk, "different-name", canonical_actor(OUR), "active", SURFACE, CAPS)),
+        n_alias:    record(n_alias, "alias", OUR, our_sk, "active"),
+        n_imp:      record(n_imp, "bound", IMP, imp_sk, "active"),
+        n_revoked:  record(n_revoked, "bound", OUR, our_sk, "revoked"),
+        # "ghost.aint" intentionally ABSENT
     }
 
-    def offer(aint, pub):
-        return {"claimed_aint": aint, "sender_pubkey": pub}
-
     cases = [
-        {"name": "key-match-active", "offer": offer("vandemeent.aint", OUR), "expect_bound": True},
-        {"name": "key-mismatch",     "offer": offer("imposter.aint", OUR),  "expect_bound": False},
-        {"name": "revoked",          "offer": offer("retired.aint", OUR),   "expect_bound": False},
-        {"name": "unresolvable",     "offer": offer("ghost.aint", OUR),     "expect_bound": False},
+        {"name": "bound-match",   "offer": {"claimed_aint": n_bound,    "sender_pubkey": OUR}, "expect_bound": True},
+        {"name": "forged-suffix", "offer": {"claimed_aint": n_forged,   "sender_pubkey": OUR}, "expect_bound": False},
+        {"name": "bad-proof",     "offer": {"claimed_aint": n_badproof, "sender_pubkey": OUR}, "expect_bound": False},
+        {"name": "alias-match",   "offer": {"claimed_aint": n_alias,    "sender_pubkey": OUR}, "expect_bound": True},
+        {"name": "key-mismatch",  "offer": {"claimed_aint": n_imp,      "sender_pubkey": OUR}, "expect_bound": False},
+        {"name": "revoked",       "offer": {"claimed_aint": n_revoked,  "sender_pubkey": OUR}, "expect_bound": False},
+        {"name": "unresolvable",  "offer": {"claimed_aint": "ghost.aint", "sender_pubkey": OUR}, "expect_bound": False},
     ]
 
-    print("ZTIP conformance — AINS resolve + key-match v4")
-    print(f"  our key : {OUR}")
-    print(f"  imp key : {IMP}")
+    print("ZTIP conformance — AINS resolve + key-match v4 (name=namespace, key=identity, SSM=surface)")
+    print(f"  our key : {OUR}  suffix={our_suf}  surface={SURFACE}")
+    print(f"  imp key : {IMP}  suffix={imp_suf}")
     for c in cases:
-        o = c["offer"]
-        rec = fixture.get(o["claimed_aint"])
-        st = rec["status"] if rec else "—(absent)"
-        print(f"  {'+' if c['expect_bound'] else '-'} {c['name']:16s} {o['claimed_aint']:16s} status={st:14s} bound={str(c['expect_bound']).lower()}")
+        print(f"  {'+' if c['expect_bound'] else '-'} {c['name']:14s} {c['offer']['claimed_aint']:26s} bound={str(c['expect_bound']).lower()}")
 
     doc = {
         "primitive": "ains-resolve-keymatch",
         "version": 4,
-        "binding_rule": "bound := resolve(claimed_aint) exists AND status=='active' AND record.public_key == offer.sender_pubkey",
-        "encoding_note": "record.public_key and offer.sender_pubkey MUST share one encoding (base64, SPEC sec.4); hex vs base64 is the #1 key-match breaker.",
+        "model": "identity=jis:ed25519:key · namespace=.aint · surface=SSM. AINS names are namespace entries, not identities; all trust binds to the resolved JIS key.",
+        "suffix_rule": "bound-name suffix = base32(sha256(pubkey_raw || '|aint|1'))[:6] lowercase — a namespace disambiguator, recompute from the resolved key and require a match.",
+        "binding_rule": "bound := resolves AND status=='active' AND proof verifies over name|canonical_actor|status|surface|sorted(caps) AND (name_class!='bound' OR suffix matches key) AND canonical_actor=='jis:ed25519:'+public_key AND public_key == offer.sender_pubkey",
+        "encoding_note": "public_key / sender_pubkey share one encoding (base64, SPEC sec.4). Bind by KEY, never by label.",
         "resolve_fixture": fixture,
         "cases": cases,
     }

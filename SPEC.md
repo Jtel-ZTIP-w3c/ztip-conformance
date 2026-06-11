@@ -153,38 +153,66 @@ select-iddrop, select-other-aid, non-select-read, too-short.
 
 ## 9. AINS resolve + key-match (v4)
 
+**An AINS name is not an identity — it resolves to one.** The clean split:
+
+```
+identity  = key   → jis:ed25519:<fingerprint>   (canonical; all trust binds here)
+namespace = .aint → AINS resolves names to keys / capabilities / endpoints (not identity)
+surface   = SSM   → what lane/type the record claims to be (without trusting name or payload)
+```
+
 An offer *claims* a `.aint`. A valid signature proves a key; it does **not** prove the key
-belongs to that name. v4 is the name→key binding: resolve the `.aint` over AINS, and check
-the resolved key against the offer's `sender_pubkey`.
+owns that name. v4 binds by **key**, never by the pretty label.
 
-Resolve shape (`GET /api/ains/resolve/<name>`):
+### Name classes
+
+- **alias** — `jasper.aint` — human, mutable, registry/local policy.
+- **bound** — `vandemeent-<suffix>.aint` — a namespace *disambiguator*, key-derived:
+  ```
+  suffix = base32( sha256( pubkey_raw || "|aint|1" ) )[:6]   (lowercase, no padding)
+  ```
+  Anyone recomputes the same suffix for the same key. A bound name that lies about the key is
+  caught as a suffix mismatch — a *key* mismatch, not a "name conflict". The suffix is a hint,
+  **not** the identity.
+
+### Resolve record
 
 ```
-{ "record": { "public_key": "<base64 Ed25519>", "status": "active" | "revoked" | …,
-              "entity_type": "idd" | … } }
+{ "name": "vandemeent-<suffix>.aint", "name_class": "bound" | "alias",
+  "canonical_actor": "jis:ed25519:<base64 key>", "public_key": "<base64 key>",
+  "status": "active" | "revoked", "surface": "<SSM lane>", "capabilities": [ … ],
+  "proof": "<base64 Ed25519 sig over name|canonical_actor|status|surface|sorted(caps)>" }
 ```
 
-**Binding rule:**
+The `proof` is the actor's own signature over the record, so a malicious resolver can't
+fabricate a binding.
+
+### Binding rule
 
 ```
 bound(offer) :=
     resolve(offer.claimed_aint) exists
-    AND  record.status == "active"
-    AND  record.public_key == offer.sender_pubkey
+    AND status == "active"
+    AND proof verifies (over name|canonical_actor|status|surface|sorted(caps)) under public_key
+    AND (name_class != "bound"  OR  suffix(name) == recompute_suffix(public_key))
+    AND canonical_actor == "jis:ed25519:" + public_key
+    AND public_key == offer.sender_pubkey          # bind by KEY, never the label
 ```
 
-A revoked `.aint` resolves to a signed **tombstone** (`status: "revoked"`) — it does not
-vanish, and it does not bind. An absent name does not resolve and stays an unbound T-1
-candidate.
+A revoked `.aint` resolves to a signed **tombstone** (`status: "revoked"`) — it doesn't
+vanish and doesn't bind. An absent name stays an unbound T-1 candidate.
 
-> **Encoding — the #1 key-match breaker.** `record.public_key` and `offer.sender_pubkey`
-> MUST be in the **same** encoding (base64, §4). The match is a direct string compare;
-> hex-vs-base64 silently breaks it. If a deployment's resolve returns hex while offers carry
-> base64, normalise one side before comparing — but the canonical wire form is base64.
+> **The rule.** AINS names are semantic-namespace entries, not identities. Identity is the
+> JIS key; SSM labels the semantic surface. A resolver MAY use hash-qualified `.aint` names
+> for collision resistance, but every trust decision MUST bind to the resolved JIS actor key.
+> Everyone may mint their own `.aint`; policy just never trusts the name without the key.
 
-Vectors: `vectors/resolve_v4.json` ships an offline `resolve_fixture` (no live call) and four
-cases: key-match-active (binds), key-mismatch (different key), revoked (tombstone),
-unresolvable (absent).
+> **Encoding — the #1 key-match breaker.** `public_key` and `sender_pubkey` MUST share one
+> encoding (base64, §4); hex-vs-base64 silently breaks the compare.
+
+Vectors: `vectors/resolve_v4.json` (offline, no live call), seven cases: bound-match,
+forged-suffix (name lies about the key), bad-proof (record forged), alias-match, key-mismatch,
+revoked (tombstone), unresolvable.
 
 ---
 
