@@ -39,6 +39,7 @@ Two honest entry points: start at the **roots** (jis FIR/A) for first principles
 | **v6** | **Offer-first ceremony** | the stages OFFER→…→MATERIALIZE; the T-1→T0 "never auto-bind" rule | ✅ **live** (`ceremony_v6.json`) |
 | **v7** | **Challenge-response (M2M)** | the network form of the jis-root handshake: agent↔agent FIR/A, no proximity (JIS-001) | ✅ **live** (`challenge_v7.json`) |
 | **v8** | **Entity-class profiles** | same handshake, swapped proof vocabulary: human / AI / IoT — one resolver, many actors | ✅ **live** (`entity_v8.json`) |
+| **v9** | **DID-as-namespace** | the one-way projection: jis wraps into did (recognized as a name); a static did cannot be promoted to a live act | ✅ **live** (`did_namespace_v9.json`) |
 
 Legend: ✅ live · 🔜 next · ⬜ genesis/planned. The **roots** (jis/tibet) are the bedrock;
 the numbered levels compose upward on them.

@@ -1,0 +1,61 @@
+{
+  "primitive": "did-namespace",
+  "version": 9,
+  "verify_at": 1750000000,
+  "principle": "wrap active->static always (jis->did); promote static->active never (a did: doc is a snapshot, not a live process). jis ⊋ did.",
+  "jis_key": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
+  "did_document": {
+    "id": "did:web:vandemeent.aint",
+    "verificationMethod": [
+      {
+        "id": "did:web:vandemeent.aint#k0",
+        "type": "Ed25519VerificationKey2020",
+        "publicKeyBase64": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4="
+      }
+    ]
+  },
+  "challenge": {
+    "agent_id": "root_idd",
+    "nonce": "n0nce-live",
+    "issued_at": 1749999997,
+    "ttl_seconds": 30
+  },
+  "static_gate": "recognize a did: name: verify the embedded key + its signed credential. Admitted AS A NAME (namespace, not instruction).",
+  "active_gate": "admission to ACT requires a fresh proof over the verifier's own challenge (live act, v7). A static credential is a document, not a live act -> refused. Capability gate (liveness), not an entity-class block.",
+  "cases": [
+    {
+      "name": "jis-to-did-projection",
+      "check": "projection",
+      "expect": true
+    },
+    {
+      "name": "static-gate-did",
+      "gate": "static",
+      "presentation": {
+        "type": "static-credential",
+        "payload": "did-doc:v1:did:web:vandemeent.aint:209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
+        "sig": "cyDrE2n+3F+SLMP+nVEGi/pUgZEjR5TZPZfOo9UopxHSMUtpfM2zBohn98zRzx//4aZb7qkjIkYjz7f9f9mFAw=="
+      },
+      "expect": true
+    },
+    {
+      "name": "active-gate-jis",
+      "gate": "active",
+      "presentation": {
+        "type": "fresh-attestation",
+        "sig": "Dmvw+BjWAiQ4QgjCU5TdTFfpZsfjYSWIN4qRVjPHKnIqEUazpkZRVU0BJH4ahRtgfDVL8d82EKFVY4A6B8wRDQ=="
+      },
+      "expect": true
+    },
+    {
+      "name": "active-gate-did",
+      "gate": "active",
+      "presentation": {
+        "type": "static-credential",
+        "payload": "did-doc:v1:did:web:vandemeent.aint:209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
+        "sig": "cyDrE2n+3F+SLMP+nVEGi/pUgZEjR5TZPZfOo9UopxHSMUtpfM2zBohn98zRzx//4aZb7qkjIkYjz7f9f9mFAw=="
+      },
+      "expect": false
+    }
+  ]
+}

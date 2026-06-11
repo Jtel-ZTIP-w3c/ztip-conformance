@@ -346,3 +346,32 @@ each proving it's trustworthy *in its own terms*.
 Vectors: `vectors/entity_v8.json` — five cases: human-biometric, ai-mandate, iot-continuity
 (all accept), wrong-lane (human with an AI proof → refused), bad-signature (right lane, wrong
 key → refused).
+
+---
+
+## 14. DID-as-namespace (v9) — the one-way projection
+
+**You can always wrap an active, hardware-bound L0 primitive (`jis:` + SSM) into a dumb,
+static envelope (`did:`); you can never promote a static envelope into the active primitive.**
+A snapshot is not a live process. So `jis:` ⊋ `did:` — strictly more, by a one-way projection.
+
+- **Projection** — a `jis:` identity serializes into a valid `did:` document (the key
+  round-trips into `verificationMethod`). Backwards-compatible, lossy, works.
+- **Static gate** — a `did:` document is *recognized as a namespace name*: verify the embedded
+  key and its signed credential. `jis:` treats `did:` as a **name, never an instruction**
+  (bind-by-key, §9). Admitted *as a name*.
+- **Active gate** — admission *to act* requires a **fresh proof over the verifier's own
+  challenge** (a live act, §12). A static `did:` credential — however valid — is a document,
+  not a live act over *this* challenge, so it is **refused**. A live actor produces the fresh
+  response and is admitted.
+
+The discriminator is not the scheme and not the entity-class — it is **liveness**: *presenting
+a static credential ≠ performing a live proof*. A `jis:`-bearing AI passes the active gate
+(it performs the handshake); a static-only presenter does not, whoever holds it. This is a
+**capability gate, not an entity-class block** — it admits accountable live actors and
+declines static drive-by ones. (It is also why a surface that gates posting on a live act
+resists automated flooding: every post costs a fresh, bindable act.)
+
+Vectors: `vectors/did_namespace_v9.json` — four cases: jis-to-did-projection, static-gate-did
+(recognized as a name), active-gate-jis (admitted), active-gate-did (a static credential
+cannot be promoted to a live act → refused).
