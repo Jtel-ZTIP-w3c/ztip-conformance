@@ -1,0 +1,57 @@
+{
+  "primitive": "ains-resolve-keymatch",
+  "version": 4,
+  "binding_rule": "bound := resolve(claimed_aint) exists AND status=='active' AND record.public_key == offer.sender_pubkey",
+  "encoding_note": "record.public_key and offer.sender_pubkey MUST share one encoding (base64, SPEC sec.4); hex vs base64 is the #1 key-match breaker.",
+  "resolve_fixture": {
+    "vandemeent.aint": {
+      "public_key": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
+      "status": "active",
+      "entity_type": "idd"
+    },
+    "imposter.aint": {
+      "public_key": "GscbMlEaoPodPGK2HybIxipWX8n/2apoW1NkfQfORTI=",
+      "status": "active",
+      "entity_type": "idd"
+    },
+    "retired.aint": {
+      "public_key": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4=",
+      "status": "revoked",
+      "entity_type": "idd"
+    }
+  },
+  "cases": [
+    {
+      "name": "key-match-active",
+      "offer": {
+        "claimed_aint": "vandemeent.aint",
+        "sender_pubkey": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4="
+      },
+      "expect_bound": true
+    },
+    {
+      "name": "key-mismatch",
+      "offer": {
+        "claimed_aint": "imposter.aint",
+        "sender_pubkey": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4="
+      },
+      "expect_bound": false
+    },
+    {
+      "name": "revoked",
+      "offer": {
+        "claimed_aint": "retired.aint",
+        "sender_pubkey": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4="
+      },
+      "expect_bound": false
+    },
+    {
+      "name": "unresolvable",
+      "offer": {
+        "claimed_aint": "ghost.aint",
+        "sender_pubkey": "209BniGY4PwDTa0txBnDK1yWoo0EGTw0/4Gh/IZLzp4="
+      },
+      "expect_bound": false
+    }
+  ]
+}

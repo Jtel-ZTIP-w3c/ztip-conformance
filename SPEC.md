@@ -148,3 +148,40 @@ AID itself — the canonical behaviour above. The offer payload itself is valida
 
 Vectors: `vectors/nfc_v3.json` — hex APDUs → expected `{select_for_aid, sw, payload}`:
 select-iddrop, select-other-aid, non-select-read, too-short.
+
+---
+
+## 9. AINS resolve + key-match (v4)
+
+An offer *claims* a `.aint`. A valid signature proves a key; it does **not** prove the key
+belongs to that name. v4 is the name→key binding: resolve the `.aint` over AINS, and check
+the resolved key against the offer's `sender_pubkey`.
+
+Resolve shape (`GET /api/ains/resolve/<name>`):
+
+```
+{ "record": { "public_key": "<base64 Ed25519>", "status": "active" | "revoked" | …,
+              "entity_type": "idd" | … } }
+```
+
+**Binding rule:**
+
+```
+bound(offer) :=
+    resolve(offer.claimed_aint) exists
+    AND  record.status == "active"
+    AND  record.public_key == offer.sender_pubkey
+```
+
+A revoked `.aint` resolves to a signed **tombstone** (`status: "revoked"`) — it does not
+vanish, and it does not bind. An absent name does not resolve and stays an unbound T-1
+candidate.
+
+> **Encoding — the #1 key-match breaker.** `record.public_key` and `offer.sender_pubkey`
+> MUST be in the **same** encoding (base64, §4). The match is a direct string compare;
+> hex-vs-base64 silently breaks it. If a deployment's resolve returns hex while offers carry
+> base64, normalise one side before comparing — but the canonical wire form is base64.
+
+Vectors: `vectors/resolve_v4.json` ships an offline `resolve_fixture` (no live call) and four
+cases: key-match-active (binds), key-mismatch (different key), revoked (tombstone),
+unresolvable (absent).

@@ -34,8 +34,8 @@ Two honest entry points: start at the **roots** (jis FIR/A) for first principles
 | **v1** | **VINK attestation** | jis-signing applied to a yes/no claim set: canonical string + Ed25519 sign/verify | ✅ **live** (`vink_v1.json`) |
 | **v2** | **Offer envelope** | the `IdDropOffer` JSON wire-format: fields, types, TTL, how `vinks`/`vinks_sig` embed | ✅ **live** (`offer_v2.json`) |
 | **v3** | **NFC transport** | HCE AID + SELECT APDU + payload framing — two independent stacks can physically tap | ✅ **live** (`nfc_v3.json`) |
-| v4 | AINS resolve + key-match | `.aint` → pubkey resolution; verifier checks `resolved_pubkey == offer.sender_pubkey` | 🔜 **next** |
-| v5 | Fresh-assurance lane | session VINKs (`live_presence`/`rightful_holder`) with TTL; fresh-at-use, never persisted | ⬜ |
+| **v4** | **AINS resolve + key-match** | `.aint` → pubkey resolution; verifier checks `resolved_pubkey == offer.sender_pubkey` | ✅ **live** (`resolve_v4.json`) |
+| v5 | Fresh-assurance lane | session VINKs (`live_presence`/`rightful_holder`) with TTL; fresh-at-use, never persisted | 🔜 **next** |
 | v6 | Offer-first ceremony | the stages OFFER→…→MATERIALIZE; the T-1→T0 "never auto-bind" rule | ⬜ |
 | v7 | Challenge-response (M2M) | the network form of the jis-root handshake: agent↔agent FIR/A, no proximity (JIS-001) | ⬜ |
 | v8 | Entity-class profiles | same handshake, swapped proof vocabulary: human / AI / IoT — one resolver, many actors | ⬜ |
