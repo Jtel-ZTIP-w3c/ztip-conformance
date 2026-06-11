@@ -1,0 +1,47 @@
+{
+  "primitive": "nfc-transport",
+  "version": 3,
+  "aid": "f0494444524f50",
+  "select_header": "00a40400",
+  "sw_ok": "9000",
+  "sw_unknown": "6a82",
+  "note": "Reference HCE checks only the SELECT header (platform routes by AID); a non-platform impl MUST check the AID, as specified here. Payload on success is the v2 offer JSON.",
+  "cases": [
+    {
+      "name": "select-iddrop",
+      "apdu": "00a4040007f0494444524f5000",
+      "expect": {
+        "select_for_aid": true,
+        "sw": "9000",
+        "payload": true
+      }
+    },
+    {
+      "name": "select-other-aid",
+      "apdu": "00a4040007a000000247100100",
+      "expect": {
+        "select_for_aid": false,
+        "sw": "6a82",
+        "payload": false
+      }
+    },
+    {
+      "name": "non-select-read",
+      "apdu": "00b0000000",
+      "expect": {
+        "select_for_aid": false,
+        "sw": "6a82",
+        "payload": false
+      }
+    },
+    {
+      "name": "too-short",
+      "apdu": "00a4",
+      "expect": {
+        "select_for_aid": false,
+        "sw": "6a82",
+        "payload": false
+      }
+    }
+  ]
+}

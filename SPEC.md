@@ -119,3 +119,32 @@ attestation — the unit a Terminal reads off the tap.
 
 Vectors: `vectors/offer_v2.json` carries a fixed `verify_at` (so fresh vs expired is
 deterministic) and four cases: fresh-valid, expired-ttl, tampered-sig, identity-only.
+
+---
+
+## 8. NFC transport (v3)
+
+The offer crosses the air over NFC Host Card Emulation. A verifier's reader SELECTs the
+offerer's application by DF name; the offerer returns the offer bytes.
+
+- **AID** (application identifier): `F0 49 44 44 52 4F 50` — `F0` (proprietary) + ASCII
+  `"IDDROP"`.
+- **SELECT** (by DF name): `00 A4 04 00 <Lc> <AID> [Le]` — CLA=`00`, INS=`A4`, P1=`04`,
+  P2=`00`, then `Lc` = AID length, the AID bytes, optional `Le`.
+- **Response** — a SELECT of our AID: `<offer JSON bytes> 90 00`. Any other command (wrong
+  AID, non-SELECT, malformed/too-short): `6A 82` (file/app not found), no payload.
+
+```
+respond(apdu) :=
+    apdu starts with 00 A4 04 00  AND  apdu data field == AID   →  offer ‖ 9000
+    otherwise                                                   →  6A82
+```
+
+The reference Android HCE service (`NfcOfferService`) checks only the SELECT header,
+because the platform routes APDUs to it by the registered AID (`apduservice.xml`). A
+**non-platform** implementation (e.g. a reader, or a non-Android offerer) MUST check the
+AID itself — the canonical behaviour above. The offer payload itself is validated by §7
+(v2); v3 only pins the framing.
+
+Vectors: `vectors/nfc_v3.json` — hex APDUs → expected `{select_for_aid, sw, payload}`:
+select-iddrop, select-other-aid, non-select-read, too-short.

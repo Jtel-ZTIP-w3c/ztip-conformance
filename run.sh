@@ -8,3 +8,7 @@ echo
 echo "### v2 — offer envelope"
 python3 ref/generate_offer.py
 python3 ref/verify_offer.py
+echo
+echo "### v3 — NFC transport"
+python3 ref/generate_nfc.py
+python3 ref/verify_nfc.py
