@@ -96,3 +96,18 @@ This kit mirrors the live, running implementation:
 - **IETF Internet-Draft (jis:):** https://datatracker.ietf.org/doc/draft-vandemeent-jis-identity/
 
 Open. Use it, break it, re-implement it. That is the point.
+
+---
+
+## Part of the conformance family
+
+Four runnable kits, one per branch of the stack. Run any, implement your own verifier against its
+vectors, interoperate with no vendor in the loop. Together they let a second implementation
+reconstruct the whole spine from the vectors alone.
+
+- [ztip-conformance](https://github.com/Jtel-ZTIP-w3c/ztip-conformance) — identity / attestation / ceremony
+- [tibet-comms-conformance](https://github.com/Jtel-ZTIP-w3c/tibet-comms-conformance) — communication / routing
+- [tibet-evidence-conformance](https://github.com/Jtel-ZTIP-w3c/tibet-evidence-conformance) — storage / evidence
+- [tibet-security-conformance](https://github.com/Jtel-ZTIP-w3c/tibet-security-conformance) — policy / enforcement
+
+Primitive atlas: https://github.com/Jtel-ZTIP-w3c/Jtel-ZTIP-w3c.github.io (INTEROP.md).
